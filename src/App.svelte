@@ -4,6 +4,8 @@
   import { BeaconWallet } from "@taquito/beacon-wallet";
   import BigNumber from "bignumber.js";
   import type { UserResults, UserChoice } from "./types";
+  import type { RockPaperScissorsWalletType } from "./ts-types/rock-paper-scissors.types";
+  import type { address } from "./ts-types/type-aliases";
   import config from "./config";
   import RockImg from "./assets/rock-b.png";
   import PaperImg from "./assets/paper-b.png";
@@ -20,10 +22,15 @@
     paper: 2,
     scissors: 3
   };
+  const reverse_correspondences = {
+    1: "Rock",
+    2: "Paper",
+    3: "Scissors"
+  };
 
   let Tezos: TezosToolkit;
   let contract: ContractAbstraction<Wallet>;
-  let storage: any;
+  let storage: Storage;
   let wallet: BeaconWallet;
   let walletOptions = {
     name: "Rock Paper Scissors",
@@ -50,14 +57,15 @@
       userBalance = 0;
     }
     // loads current user's results
-    const results = await storage.players.get(userAddress);
+    const results = await storage.players.get(userAddress as address);
     if (results) {
       userResults = results;
     } else {
       userResults = {
         won: { amount: new BigNumber(0), total: new BigNumber(0) },
         lost: new BigNumber(0),
-        last_game: null
+        last_game: null,
+        wins_in_a_row: new BigNumber(0)
       };
     }
   };
@@ -98,25 +106,30 @@
       try {
         const op = await contract.methods
           .play(convertUserChoice(userChoice))
-          .send({ amount: storage.prize.toNumber(), mutez: true });
+          .send({
+            amount: storage.prize.plus(storage.play_fee).toNumber(),
+            mutez: true
+          });
         await op.confirmation();
         // refreshes the storage
         storage = await contract.storage();
         // fetches the new user results
         const results: UserResults | undefined = await storage.players.get(
-          userAddress
+          userAddress as address
         );
         if (!results) {
           throw "Unexpected empty player's results";
         }
         // finds if player won or lost
+        const contractChoice = results.last_game.contract.toNumber();
         if (
           results.won.amount.isGreaterThan(userResults.won.amount) &&
           results.lost.isEqualTo(userResults.lost)
         ) {
           // player won
           gameResult = true;
-          resultText = "Congratulations! You won!";
+
+          resultText = `Congratulations! The contract played ${reverse_correspondences[contractChoice]}, you won!`;
         } else if (
           results.lost.isGreaterThan(userResults.lost) &&
           results.won.amount.isEqualTo(userResults.won.amount)
@@ -124,16 +137,7 @@
           // player lost
           gameResult = false;
 
-          const contractChoice = results.last_game.contract.toNumber();
-          if (contractChoice === 1) {
-            resultText = "Sorry, the contract played Rock, you lost!";
-          } else if (contractChoice === 2) {
-            resultText = "Sorry, the contract played Paper, you lost!";
-          } else if (contractChoice === 3) {
-            resultText = "Sorry, the contract played Scissors, you lost!";
-          } else {
-            resultText = "Sorry, you lost!";
-          }
+          resultText = `Sorry, the contract played ${reverse_correspondences[contractChoice]}, you lost!`;
         } else {
           const opStatus = await op.status();
           gameResult = false;
@@ -160,7 +164,9 @@
 
   onMount(async () => {
     Tezos = new TezosToolkit(RPC_URL);
-    contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
+    contract = await Tezos.wallet.at<RockPaperScissorsWalletType>(
+      CONTRACT_ADDRESS
+    );
     storage = await contract.storage();
 
     wallet = new BeaconWallet(walletOptions as any);
@@ -232,7 +238,11 @@
     mvpAddress={storage.mvp ? storage.mvp.player : ""}
     {userAddress}
   />
-  <WalletDisplay disconnect={disconnectWallet} {userResults} />
+  <WalletDisplay
+    disconnect={disconnectWallet}
+    {userResults}
+    jackpotFactor={storage.jackpot_factor}
+  />
 {/if}
 <main>
   <section class="header">
@@ -288,11 +298,9 @@
       {#if storage}
         <div class="prize">
           <p>Price: {storage.prize.dividedBy(10 ** 6).toNumber()} tez</p>
+          <p>Play fee: {storage.play_fee.dividedBy(10 ** 6).toNumber()} tez</p>
           <p>
-            Prize: {storage.prize
-              .multipliedBy(storage.mul_factor)
-              .dividedBy(10 ** 6)
-              .toNumber()} tez
+            Jackpot: {storage.jackpot.dividedBy(10 ** 6).toNumber()} tez
           </p>
         </div>
       {/if}

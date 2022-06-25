@@ -5,7 +5,7 @@ export default {
   },
   contractAddress: {
     mainnet: "",
-    testnet: "KT1Fw8uiLoxM3s1zzKnQeUrcvB1UQdJue7Xh"
+    testnet: "KT1UoVvVmZZ7rqNzJNqBj1mLSvsi3UmNnRPm" //"KT1Fw8uiLoxM3s1zzKnQeUrcvB1UQdJue7Xh"
   },
   tezosDomains: {
     mainnet: "KT1GBZmSxmnKJXGMdMLbugPfLyUPmuLSMwKS",

@@ -3,7 +3,7 @@
   import UserIcon from "../assets/user-x.svg";
   import type { UserResults } from "../types";
 
-  export let disconnect, userResults: UserResults;
+  export let disconnect, userResults: UserResults, jackpotFactor: BigNumber;
 </script>
 
 <style lang="scss">
@@ -40,6 +40,16 @@
 
 <div class="wallet">
   {#if userResults}
+    <div class="user-results">
+      <div>Jackpot after</div>
+      <div>
+        {jackpotFactor.minus(userResults.wins_in_a_row).toNumber()} win{jackpotFactor
+          .minus(userResults.wins_in_a_row)
+          .isGreaterThan(1)
+          ? "s"
+          : ""}
+      </div>
+    </div>
     <div class="user-results">
       <div>Won</div>
       <div>{userResults.won.amount.toNumber()}</div>

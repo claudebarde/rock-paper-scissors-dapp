@@ -13,7 +13,6 @@
 
   afterUpdate(async () => {
     if (mvpAddress && mvpAddress !== userAddress) {
-      console.log("MVP update");
       const domainContractAddress = config.tezosDomains[network];
       const contract = await Tezos.wallet.at(domainContractAddress);
       const storage: any = await contract.storage();
