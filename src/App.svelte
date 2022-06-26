@@ -14,7 +14,7 @@
   import ResultToast from "./lib/ResultToast.svelte";
   import MVP from "./lib/MVP.svelte";
 
-  const NETWORK: "mainnet" | "testnet" = "testnet";
+  const NETWORK: "mainnet" | "testnet" = "mainnet";
   const CONTRACT_ADDRESS = config.contractAddress[NETWORK];
   const RPC_URL = config.rpcUrl[NETWORK];
   const correspondences = {
@@ -217,6 +217,14 @@
     width: 100%;
   }
 
+  .rules {
+    text-align: center;
+
+    p {
+      margin: 3px;
+    }
+  }
+
   @media only screen and (max-width: 600px) {
     .header {
       h1 {
@@ -304,6 +312,11 @@
           </p>
         </div>
       {/if}
+      <div class="rules">
+        <p><strong>Rules</strong></p>
+        <p>Standard rules of Rock, paper, scissors.</p>
+        <p>The contract wins if its random choice is the same as yours.</p>
+      </div>
     {:else}
       <button class="primary" on:click={connectWallet}>
         Connect your wallet

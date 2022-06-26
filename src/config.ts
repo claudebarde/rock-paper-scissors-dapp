@@ -4,7 +4,7 @@ export default {
     testnet: "https://ithacanet.ecadinfra.com/"
   },
   contractAddress: {
-    mainnet: "",
+    mainnet: "KT1DrZokUnBg35YANi5sQxGfyWgDSAJRfJqY",
     testnet: "KT1UoVvVmZZ7rqNzJNqBj1mLSvsi3UmNnRPm" //"KT1Fw8uiLoxM3s1zzKnQeUrcvB1UQdJue7Xh"
   },
   tezosDomains: {
