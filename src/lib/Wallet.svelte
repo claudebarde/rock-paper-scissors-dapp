@@ -17,6 +17,7 @@
     justify-content: center;
     align-items: center;
     gap: 20px;
+    z-index: 999;
 
     button {
       border: solid 2px $blue-green;

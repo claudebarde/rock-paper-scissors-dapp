@@ -71,6 +71,10 @@
   };
 
   const connectWallet = async () => {
+    if (wallet === undefined) {
+      wallet = new BeaconWallet(walletOptions as any);
+    }
+
     try {
       await wallet.requestPermissions({
         network: {
@@ -86,10 +90,11 @@
     }
   };
 
-  const disconnectWallet = () => {
+  const disconnectWallet = async () => {
     userAddress = "";
     userBalance = 0;
     userChoice = undefined;
+    await wallet.client.removeAllAccounts();
   };
 
   const convertUserChoice = (val: UserChoice): number => {
